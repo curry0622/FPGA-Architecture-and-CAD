@@ -28,7 +28,6 @@ void TopoPart::read_input(std::string file_input) {
     std::cout << "# Nets: " << num_nets << std::endl;
     std::cout << "# Fixed nodes: " << num_fixed_nodes << std::endl;
     ss.clear();
-    pause();
 
     // Initialize nodes
     for(int i = 0; i < num_nodes; i++) {
@@ -50,7 +49,6 @@ void TopoPart::read_input(std::string file_input) {
         std::cout << "FPGA1: " << fpga1 << " FPGA2: " << fpga2 << std::endl;
         ss.clear();
     }
-    pause();
 
     // Read nets
     std::cout << "Read nets:" << std::endl;
@@ -60,16 +58,17 @@ void TopoPart::read_input(std::string file_input) {
         ss << line;
         ss >> src;
         std::cout << "Src: " << src << " ";
+        Net* net = new Net(nodes[src]);
         while(ss >> sink) {
             std::cout << "Sink: " << sink << " ";
+            net->add_sink(nodes[sink]);
         }
         std::cout << std::endl;
+        nets.push_back(net);
         ss.clear();
     }
-    pause();
 
     // Read fixed nodes
-    std::cout << "Read fixed nodes:" << std::endl;
     for(int i = 0; i < num_fixed_nodes; i++) {
         std::getline(fin, line);
         int node, fpga;
@@ -80,7 +79,10 @@ void TopoPart::read_input(std::string file_input) {
         fpgas[fpga]->add_node(nodes[node]);
         ss.clear();
     }
-    pause();
+
+    for(const auto& net : nets) {
+        net->print();
+    }
 }
 
 void TopoPart::write_output(std::string file_output) {

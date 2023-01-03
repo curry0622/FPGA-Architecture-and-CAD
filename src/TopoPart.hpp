@@ -10,6 +10,11 @@
 #include "Fpga.hpp"
 #endif
 
+#ifndef NET_HPP
+#define NET_HPP
+#include "Net.hpp"
+#endif
+
 class TopoPart {
 public:
     // Variables
@@ -21,6 +26,7 @@ public:
     int num_fixed_nodes;
     std::unordered_map<int, Node*> nodes;
     std::unordered_map<int, Fpga*> fpgas;
+    std::vector<Net*> nets;
 
     // Constructors
     TopoPart(std::string file_input, std::string file_output);

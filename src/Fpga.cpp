@@ -25,7 +25,7 @@ void Fpga::print() {
     std::cout << "Capacity: " << capacity << std::endl;
     std::cout << "Nodes: ";
     for(const auto& node : nodes) {
-        std::cout << node.first << " ";
+        std::cout << node.second->index << " ";
     }
     std::cout << std::endl;
 }

@@ -35,6 +35,11 @@ void TopoPart::read_input(std::string file_input) {
         nodes[i] = new Node(i);
     }
 
+    // Initialize FPGAs
+    for(int i = 0; i < num_fpgas; i++) {
+        fpgas[i] = new Fpga(i, capacity);
+    }
+
     // Read fpga connection channels
     std::cout << "Read fpga connection channels:" << std::endl;
     for(int i = 0; i < num_fpga_conns; i++) {
@@ -72,10 +77,8 @@ void TopoPart::read_input(std::string file_input) {
         ss >> node >> fpga;
         nodes[node]->set_fpga(fpga);
         nodes[node]->set_fixed();
+        fpgas[fpga]->add_node(nodes[node]);
         ss.clear();
-    }
-    for(int i = 0; i < num_nodes; i++) {
-        nodes[i]->print();
     }
     pause();
 }

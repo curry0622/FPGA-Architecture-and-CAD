@@ -1,5 +1,10 @@
 #include <bits/stdc++.h>
 
+#ifndef NODE_HPP
+#define NODE_HPP
+#include "Node.hpp"
+#endif
+
 class TopoPart {
 public:
     // Variables
@@ -9,6 +14,7 @@ public:
     int num_nodes;
     int num_nets;
     int num_fixed_nodes;
+    std::unordered_map<int, Node*> nodes;
 
     // Constructors
     TopoPart(std::string file_input, std::string file_output);

@@ -5,6 +5,7 @@ EXEC := topart
 SRC_DIRS := .
 SRCS := main.cpp $(wildcard $(SRC_DIRS:=/*.cpp))
 OBJS := $(SRCS:.cpp=.o)
+BM_PATH := ../benchmarks
 
 all: $(EXEC)
 
@@ -17,5 +18,6 @@ $(EXEC): $(OBJS)
 clean:
 	rm -rf $(EXEC) $(OBJS)
 
-judge:
-	./judge.sh
+verify: $(EXEC)
+	./topart $(BM_PATH)/B$(b).txt tmp.out
+	./verify $(BM_PATH)/B$(b).txt tmp.out

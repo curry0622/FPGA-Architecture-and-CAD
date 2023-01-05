@@ -9,10 +9,9 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
 
     // Initialize distance of nodes and FPGAs
     init_dists();
-    print_node_dists();
-    pause();
-    print_fpga_dists();
-    pause();
+
+    // Calculate all pairs shortest path to find min dist
+    all_pairs_shortest_path();
 
     // Write output
     write_output(file_output);
@@ -95,7 +94,7 @@ void TopoPart::init_dists() {
     for(int i = 0; i < num_nodes; i++) {
         std::vector<int> dist;
         for(int j = 0; j < num_nodes; j++) {
-            dist.push_back(0);
+            dist.push_back(INT_MAX);
         }
         node_dists.push_back(dist);
     }
@@ -104,7 +103,7 @@ void TopoPart::init_dists() {
     for(int i = 0; i < num_fpgas; i++) {
         std::vector<int> dist;
         for(int j = 0; j < num_fpgas; j++) {
-            dist.push_back(0);
+            dist.push_back(INT_MAX);
         }
         fpga_dists.push_back(dist);
     }
@@ -128,6 +127,34 @@ void TopoPart::init_dists() {
     }
 }
 
+void TopoPart::all_pairs_shortest_path() {
+    // Floyd-Warshall algorithm for node distances
+    for(int k = 0; k < num_nodes; k++) {
+        for(int i = 0; i < num_nodes; i++) {
+            for(int j = 0; j < num_nodes; j++) {
+                if(node_dists[i][k] == INT_MAX || node_dists[k][j] == INT_MAX)
+                    continue;
+                if(node_dists[i][k] + node_dists[k][j] < node_dists[i][j]) {
+                    node_dists[i][j] = node_dists[i][k] + node_dists[k][j];
+                }
+            }
+        }
+    }
+
+    // Floyd-Warshall algorithm for FPGA distances
+    for(int k = 0; k < num_fpgas; k++) {
+        for(int i = 0; i < num_fpgas; i++) {
+            for(int j = 0; j < num_fpgas; j++) {
+                if(fpga_dists[i][k] == INT_MAX || fpga_dists[k][j] == INT_MAX)
+                    continue;
+                if(fpga_dists[i][k] + fpga_dists[k][j] < fpga_dists[i][j]) {
+                    fpga_dists[i][j] = fpga_dists[i][k] + fpga_dists[k][j];
+                }
+            }
+        }
+    }
+}
+
 void TopoPart::pause() {
     std::cin.ignore();
 }
@@ -136,7 +163,10 @@ void TopoPart::print_node_dists() {
     std::cout << "Node distances:" << std::endl;
     for(int i = 0; i < num_nodes; i++) {
         for(int j = 0; j < num_nodes; j++) {
-            std::cout << node_dists[i][j] << " ";
+            if(node_dists[i][j] == INT_MAX)
+                std::cout << "- ";
+            else
+                std::cout << node_dists[i][j] << " ";
         }
         std::cout << std::endl;
     }
@@ -146,7 +176,10 @@ void TopoPart::print_fpga_dists() {
     std::cout << "FPGA distances:" << std::endl;
     for(int i = 0; i < num_fpgas; i++) {
         for(int j = 0; j < num_fpgas; j++) {
-            std::cout << fpga_dists[i][j] << " ";
+            if(fpga_dists[i][j] == INT_MAX)
+                std::cout << "- ";
+            else
+                std::cout << fpga_dists[i][j] << " ";
         }
         std::cout << std::endl;
     }

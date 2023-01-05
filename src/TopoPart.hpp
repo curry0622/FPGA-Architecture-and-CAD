@@ -27,6 +27,7 @@ public:
     void read_input(std::string file_input);
     void write_output(std::string file_output);
     void init_dists();
+    void all_pairs_shortest_path();
 
     // Utils
     void pause();

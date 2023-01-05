@@ -29,9 +29,12 @@ public:
     void init_dists();
     void all_pairs_shortest_path();
     void calc_fpga_max_dist();
+    void build_fpga_dist_sets();
 
     // Utils
     void pause();
+    void print_nodes();
+    void print_fpgas();
     void print_node_dists();
     void print_fpga_dists();
 };

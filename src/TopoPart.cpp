@@ -16,6 +16,9 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Calculate max dist of FPGAs
     calc_fpga_max_dist();
 
+    // Build FPGA distance sets
+    build_fpga_dist_sets();
+
     // Write output
     write_output(file_output);
 }
@@ -174,8 +177,38 @@ void TopoPart::calc_fpga_max_dist() {
     }
 }
 
+void TopoPart::build_fpga_dist_sets() {
+    for(auto& fpga_pair : fpgas) {
+        Fpga* fpga = fpga_pair.second;
+        for(int i = 0; i <= fpga->max_dist; i++) {
+            std::set<Fpga*> dist_set;
+            for(int j = 0; j < num_fpgas; j++) {
+                if(fpga_dists[fpga->index][j] <= i)
+                    dist_set.insert(fpgas[j]);
+            }
+            fpga->dist_sets.push_back(dist_set);
+        }
+    }
+}
+
 void TopoPart::pause() {
     std::cin.ignore();
+}
+
+void TopoPart::print_nodes() {
+    for(const auto& node_pair : nodes) {
+        Node* node = node_pair.second;
+        node->print();
+        std::cout << std::endl;
+    }
+}
+
+void TopoPart::print_fpgas() {
+    for(const auto& fpga_pair : fpgas) {
+        Fpga* fpga = fpga_pair.second;
+        fpga->print();
+        std::cout << std::endl;
+    }
 }
 
 void TopoPart::print_node_dists() {

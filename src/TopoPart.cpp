@@ -13,6 +13,9 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Calculate all pairs shortest path to find min dist
     all_pairs_shortest_path();
 
+    // Calculate max dist of FPGAs
+    calc_fpga_max_dist();
+
     // Write output
     write_output(file_output);
 }
@@ -132,6 +135,8 @@ void TopoPart::all_pairs_shortest_path() {
     for(int k = 0; k < num_nodes; k++) {
         for(int i = 0; i < num_nodes; i++) {
             for(int j = 0; j < num_nodes; j++) {
+                if(i == j)
+                    node_dists[i][j] = 0;
                 if(node_dists[i][k] == INT_MAX || node_dists[k][j] == INT_MAX)
                     continue;
                 if(node_dists[i][k] + node_dists[k][j] < node_dists[i][j]) {
@@ -145,6 +150,8 @@ void TopoPart::all_pairs_shortest_path() {
     for(int k = 0; k < num_fpgas; k++) {
         for(int i = 0; i < num_fpgas; i++) {
             for(int j = 0; j < num_fpgas; j++) {
+                if(i == j)
+                    fpga_dists[i][j] = 0;
                 if(fpga_dists[i][k] == INT_MAX || fpga_dists[k][j] == INT_MAX)
                     continue;
                 if(fpga_dists[i][k] + fpga_dists[k][j] < fpga_dists[i][j]) {
@@ -152,6 +159,18 @@ void TopoPart::all_pairs_shortest_path() {
                 }
             }
         }
+    }
+}
+
+void TopoPart::calc_fpga_max_dist() {
+    for(auto& fpga_pair : fpgas) {
+        Fpga* fpga = fpga_pair.second;
+        int max_dist = 0;
+        for(int dist : fpga_dists[fpga->index]) {
+            if(dist > max_dist)
+                max_dist = dist;
+        }
+        fpga->max_dist = max_dist;
     }
 }
 

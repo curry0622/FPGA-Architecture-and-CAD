@@ -28,6 +28,7 @@ public:
     void write_output(std::string file_output);
     void init_dists();
     void all_pairs_shortest_path();
+    void calc_fpga_max_dist();
 
     // Utils
     void pause();

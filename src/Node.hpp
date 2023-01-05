@@ -9,6 +9,7 @@ public:
     int index;
     bool fixed;
     Fpga* fpga;
+    std::vector<std::set<Node*>> dist_sets;
 
     // Constructors
     Node();

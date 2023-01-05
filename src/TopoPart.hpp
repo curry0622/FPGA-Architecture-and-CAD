@@ -19,6 +19,7 @@ public:
     std::vector<Net*> nets;
     std::vector<std::vector<int>> node_dists;
     std::vector<std::vector<int>> fpga_dists;
+    std::vector<std::pair<Node*, Fpga*>> fixed_node_pairs;
 
     // Constructors
     TopoPart(std::string file_input, std::string file_output);
@@ -30,11 +31,13 @@ public:
     void all_pairs_shortest_path();
     void calc_fpga_max_dist();
     void build_fpga_dist_sets();
+    void build_node_dist_sets();
 
     // Utils
     void pause();
     void print_nodes();
     void print_fpgas();
+    void print_nets();
     void print_node_dists();
     void print_fpga_dists();
 };

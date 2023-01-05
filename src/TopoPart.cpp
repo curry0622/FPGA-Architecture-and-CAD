@@ -6,6 +6,7 @@
 TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Read input
     read_input(file_input);
+    print_nets();
 
     // Initialize distance of nodes and FPGAs
     init_dists();
@@ -18,6 +19,9 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
 
     // Build FPGA distance sets
     build_fpga_dist_sets();
+
+    // Build node distance sets
+    build_node_dist_sets();
 
     // Write output
     write_output(file_output);
@@ -51,9 +55,9 @@ void TopoPart::read_input(std::string file_input) {
         int fpga1, fpga2;
         ss << line;
         ss >> fpga1 >> fpga2;
+        ss.clear();
         fpgas[fpga1]->add_neighbor(fpgas[fpga2]);
         fpgas[fpga2]->add_neighbor(fpgas[fpga1]);
-        ss.clear();
     }
 
     // Read nets
@@ -66,8 +70,8 @@ void TopoPart::read_input(std::string file_input) {
         while(ss >> sink) {
             net->add_sink(nodes[sink]);
         }
-        nets.push_back(net);
         ss.clear();
+        nets.push_back(net);
     }
 
     // Read fixed nodes
@@ -76,10 +80,11 @@ void TopoPart::read_input(std::string file_input) {
         int node, fpga;
         ss << line;
         ss >> node >> fpga;
+        ss.clear();
         nodes[node]->set_fpga(fpgas[fpga]);
         nodes[node]->set_fixed(true);
         fpgas[fpga]->add_node(nodes[node]);
-        ss.clear();
+        fixed_node_pairs.push_back(std::make_pair(nodes[node], fpgas[fpga]));
     }
 }
 
@@ -191,6 +196,22 @@ void TopoPart::build_fpga_dist_sets() {
     }
 }
 
+void TopoPart::build_node_dist_sets() {
+    for(const auto& p : fixed_node_pairs) {
+        Node* node = p.first;
+        Fpga* fpga = p.second;
+        int d = fpga->max_dist;
+        for(int i = 0; i <= d; i++) {
+            std::set<Node*> dist_set;
+            for(int j = 0; j < num_nodes; j++) {
+                if(node_dists[node->index][j] < i)
+                    dist_set.insert(nodes[j]);
+            }
+            node->dist_sets.push_back(dist_set);
+        }
+    }
+}
+
 void TopoPart::pause() {
     std::cin.ignore();
 }
@@ -207,6 +228,13 @@ void TopoPart::print_fpgas() {
     for(const auto& fpga_pair : fpgas) {
         Fpga* fpga = fpga_pair.second;
         fpga->print();
+        std::cout << std::endl;
+    }
+}
+
+void TopoPart::print_nets() {
+    for(const auto& net : nets) {
+        net->print();
         std::cout << std::endl;
     }
 }

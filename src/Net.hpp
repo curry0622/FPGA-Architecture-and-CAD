@@ -1,10 +1,8 @@
 #include <bits/stdc++.h>
 
-#ifndef NODE_HPP
-#define NODE_HPP
-#include "Node.hpp"
-#endif
-
+#ifndef NET_HPP
+#define NET_HPP
+class Node;
 class Net {
 public:
     // Variables
@@ -21,3 +19,4 @@ public:
     // Utils
     void print();
 };
+#endif

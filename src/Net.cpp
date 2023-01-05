@@ -1,4 +1,5 @@
 #include "Net.hpp"
+#include "Node.hpp"
 
 Net::Net() {
     src = nullptr;

@@ -1,4 +1,5 @@
 #include "Fpga.hpp"
+#include "Node.hpp"
 
 Fpga::Fpga() {
     index = -1;
@@ -19,6 +20,10 @@ bool Fpga::add_node(Node* node) {
     return true;
 }
 
+void Fpga::add_neighbor(Fpga* fpga) {
+    neighbors.push_back(fpga);
+}
+
 void Fpga::print() {
     std::cout << "[FPGA]" << std::endl;
     std::cout << "Index: " << index << std::endl;
@@ -26,6 +31,10 @@ void Fpga::print() {
     std::cout << "Nodes: ";
     for(const auto& node : nodes) {
         std::cout << node.second->index << " ";
+    }
+    std::cout << "Neighbors: ";
+    for(const auto& neighbor : neighbors) {
+        std::cout << neighbor->index << " ";
     }
     std::cout << std::endl;
 }

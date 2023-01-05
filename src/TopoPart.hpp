@@ -1,20 +1,10 @@
 #include <bits/stdc++.h>
 
-#ifndef NODE_HPP
-#define NODE_HPP
-#include "Node.hpp"
-#endif
-
-#ifndef FPGA_HPP
-#define FPGA_HPP
-#include "Fpga.hpp"
-#endif
-
-#ifndef NET_HPP
-#define NET_HPP
-#include "Net.hpp"
-#endif
-
+#ifndef TOPOPART_HPP
+#define TOPOPART_HPP
+class Node;
+class Fpga;
+class Net;
 class TopoPart {
 public:
     // Variables
@@ -38,3 +28,4 @@ public:
     // Utils
     void pause();
 };
+#endif

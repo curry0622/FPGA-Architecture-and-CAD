@@ -7,6 +7,13 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Read input
     read_input(file_input);
 
+    // Initialize distance of nodes and FPGAs
+    init_dists();
+    print_node_dists();
+    pause();
+    print_fpga_dists();
+    pause();
+
     // Write output
     write_output(file_output);
 }
@@ -83,6 +90,64 @@ void TopoPart::write_output(std::string file_output) {
     fout.close();
 }
 
+void TopoPart::init_dists() {
+    // Initialize node distances
+    for(int i = 0; i < num_nodes; i++) {
+        std::vector<int> dist;
+        for(int j = 0; j < num_nodes; j++) {
+            dist.push_back(0);
+        }
+        node_dists.push_back(dist);
+    }
+
+    // Initialize FPGA distances
+    for(int i = 0; i < num_fpgas; i++) {
+        std::vector<int> dist;
+        for(int j = 0; j < num_fpgas; j++) {
+            dist.push_back(0);
+        }
+        fpga_dists.push_back(dist);
+    }
+
+    // Update node distances
+    for(const auto& net : nets) {
+        Node* src = net->src;
+        for(const auto& sink : net->sinks) {
+            node_dists[src->index][sink->index] = 1;
+            node_dists[sink->index][src->index] = 1;
+        }
+    }
+
+    // Update FPGA distances
+    for(const auto& fpga_pair : fpgas) {
+        Fpga* fpga1 = fpga_pair.second;
+        for(const auto& fpga2 : fpga1->neighbors) {
+            fpga_dists[fpga1->index][fpga2->index] = 1;
+            fpga_dists[fpga2->index][fpga1->index] = 1;
+        }
+    }
+}
+
 void TopoPart::pause() {
     std::cin.ignore();
+}
+
+void TopoPart::print_node_dists() {
+    std::cout << "Node distances:" << std::endl;
+    for(int i = 0; i < num_nodes; i++) {
+        for(int j = 0; j < num_nodes; j++) {
+            std::cout << node_dists[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void TopoPart::print_fpga_dists() {
+    std::cout << "FPGA distances:" << std::endl;
+    for(int i = 0; i < num_fpgas; i++) {
+        for(int j = 0; j < num_fpgas; j++) {
+            std::cout << fpga_dists[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 }

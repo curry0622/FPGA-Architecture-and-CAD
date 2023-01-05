@@ -8,6 +8,7 @@ public:
     // Variables
     int index;
     int capacity;
+    int max_dist;
     std::unordered_map<int, Node*> nodes;
     std::vector<Fpga*> neighbors;
 

@@ -17,6 +17,8 @@ public:
     std::unordered_map<int, Node*> nodes;
     std::unordered_map<int, Fpga*> fpgas;
     std::vector<Net*> nets;
+    std::vector<std::vector<int>> node_dists;
+    std::vector<std::vector<int>> fpga_dists;
 
     // Constructors
     TopoPart(std::string file_input, std::string file_output);
@@ -24,8 +26,11 @@ public:
     // Methods
     void read_input(std::string file_input);
     void write_output(std::string file_output);
+    void init_dists();
 
     // Utils
     void pause();
+    void print_node_dists();
+    void print_fpga_dists();
 };
 #endif

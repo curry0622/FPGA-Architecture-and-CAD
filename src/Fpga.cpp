@@ -4,13 +4,17 @@
 Fpga::Fpga() {
     index = -1;
     capacity = -1;
+    max_dist = -1;
     nodes = {};
+    neighbors = {};
 }
 
 Fpga::Fpga(int index, int capacity) {
     this->index = index;
     this->capacity = capacity;
+    max_dist = -1;
     nodes = {};
+    neighbors = {};
 }
 
 bool Fpga::add_node(Node* node) {

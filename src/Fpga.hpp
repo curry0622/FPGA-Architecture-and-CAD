@@ -11,7 +11,7 @@ public:
     int max_dist;
     std::unordered_map<int, Node*> nodes;
     std::vector<Fpga*> neighbors;
-    std::vector<std::unordered_set<Fpga*>> dist_sets;
+    std::vector<std::set<Fpga*>> dist_sets;
 
     // Constructors
     Fpga();

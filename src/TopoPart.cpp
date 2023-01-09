@@ -24,7 +24,9 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
 
     // Initialize each node's candidates
     init_cddts();
-    print_nodes();
+
+    // Update node's candidates
+    update_cddts();
 
     // Write output
     write_output(file_output);
@@ -189,7 +191,7 @@ void TopoPart::build_fpga_dist_sets() {
     for(auto& fpga_pair : fpgas) {
         Fpga* fpga = fpga_pair.second;
         for(int i = 0; i <= fpga->max_dist; i++) {
-            std::unordered_set<Fpga*> dist_set;
+            std::set<Fpga*> dist_set;
             for(int j = 0; j < num_fpgas; j++) {
                 if(fpga_dists[fpga->index][j] <= i)
                     dist_set.insert(fpgas[j]);
@@ -205,7 +207,7 @@ void TopoPart::build_node_dist_sets() {
         Fpga* fpga = p.second;
         int d = fpga->max_dist;
         for(int i = 0; i <= d; i++) {
-            std::unordered_set<Node*> dist_set;
+            std::set<Node*> dist_set;
             for(int j = 0; j < num_nodes; j++) {
                 if(node_dists[node->index][j] < i)
                     dist_set.insert(nodes[j]);
@@ -224,6 +226,44 @@ void TopoPart::init_cddts() {
             for(const auto& fp : fpgas) {
                 Fpga* fpga = fp.second;
                 node->add_cddt(fpga);
+            }
+        }
+    }
+}
+
+void TopoPart::update_cddts() {
+    while(fixed_node_pairs.size() > 0) {
+        std::pair<Node*, Fpga*> p = fixed_node_pairs[0];
+        fixed_node_pairs.erase(fixed_node_pairs.begin());
+        Node* node_i = p.first;
+        Fpga* fpga_i = p.second;
+        int d = fpga_i->max_dist;
+
+        for(auto& node_j : node_i->dist_sets[d]) {
+            // if node moveable
+            if(!node_j->fixed) {
+                int k = node_dists[node_j->index][node_i->index];
+                node_j->intersect_cddts(fpga_i->dist_sets[k]);
+                if(node_j->cddts.size() == 1) {
+                    node_j->set_fpga(*(node_j->cddts.begin()));
+                    node_j->set_fixed(true);
+                    fixed_node_pairs.push_back(std::make_pair(node_j, node_j->fpga));
+
+                    // Build dist sets
+                    int md = node_j->fpga->max_dist;
+                    for(int i = 0; i <= md; i++) {
+                        std::set<Node*> dist_set;
+                        for(int j = 0; j < num_nodes; j++) {
+                            if(node_dists[node_j->index][j] < i)
+                                dist_set.insert(nodes[j]);
+                        }
+                        node_j->dist_sets.push_back(dist_set);
+                    }
+                }
+                if(node_j->cddts.size() == 0) {
+                    std::cout << "No feasible solution." << std::endl;
+                    return;
+                }
             }
         }
     }

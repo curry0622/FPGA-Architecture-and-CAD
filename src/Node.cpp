@@ -29,6 +29,21 @@ void Node::add_cddt(Fpga* fpga) {
     cddts.insert(fpga);
 }
 
+void Node::intersect_cddts(std::set<Fpga*> fpgas) {
+    std::set<Fpga*> tmp;
+    std::set_intersection(
+        cddts.begin(),
+        cddts.end(),
+        fpgas.begin(),
+        fpgas.end(),
+        std::inserter(
+            tmp,
+            tmp.begin()
+        )
+    );
+    cddts = tmp;
+}
+
 void Node::print() {
     std::cout << "[Node]" << std::endl;
     std::cout << "Index: " << index << std::endl;

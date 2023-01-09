@@ -24,6 +24,7 @@ public:
     void set_fixed(bool fixed);
     void add_cddt(Fpga* fpga);
     void intersect_cddts(std::set<Fpga*> fpgas);
+    int get_cut_size();
 
     // Utils
     void print();

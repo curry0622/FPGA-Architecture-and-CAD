@@ -51,6 +51,21 @@ void Node::intersect_cddts(std::set<Fpga*> fpgas) {
     cddts = tmp;
 }
 
+int Node::get_cut_size() {
+    int cut_size = 0;
+    for(const auto& net : nets) {
+        std::set<Fpga*> fpgas;
+        if(net->src->fpga != nullptr)
+            fpgas.insert(net->src->fpga);
+        for(const auto& sink : net->sinks) {
+            if(sink->fpga != nullptr)
+                fpgas.insert(sink->fpga);
+        }
+        cut_size += fpgas.size();
+    }
+    return cut_size;
+}
+
 void Node::print() {
     std::cout << "[Node]" << std::endl;
     std::cout << "Index: " << index << std::endl;

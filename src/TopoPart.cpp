@@ -24,10 +24,6 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
     build_fpga_dist_sets();
     std::cout << "build fpga dist sets done" << std::endl;
 
-    // Build node distance sets
-    build_node_dist_sets();
-    std::cout << "build node dist sets done" << std::endl;
-
     // Initialize each node's candidates
     init_cddts();
     std::cout << "init cddts done" << std::endl;
@@ -122,16 +118,6 @@ void TopoPart::write_output(std::string file_output) {
 }
 
 void TopoPart::init_dists() {
-    // Initialize node distances
-    for(int i = 0; i < num_nodes; i++) {
-        std::vector<int> dist;
-        for(int j = 0; j < num_nodes; j++) {
-            dist.push_back(INT_MAX);
-        }
-        node_dists.push_back(dist);
-    }
-    std::cout << "init node dists done" << std::endl;
-
     // Initialize FPGA distances
     for(int i = 0; i < num_fpgas; i++) {
         std::vector<int> dist;
@@ -140,18 +126,6 @@ void TopoPart::init_dists() {
         }
         fpga_dists.push_back(dist);
     }
-    std::cout << "init fpga dists done" << std::endl;
-
-    // Update node distances
-    for(const auto& p : nets) {
-        Net* net = p.second;
-        Node* src = net->src;
-        for(const auto& sink : net->sinks) {
-            node_dists[src->index][sink->index] = 1;
-            node_dists[sink->index][src->index] = 1;
-        }
-    }
-    std::cout << "update node dists done" << std::endl;
 
     // Update FPGA distances
     for(const auto& fpga_pair : fpgas) {
@@ -161,26 +135,9 @@ void TopoPart::init_dists() {
             fpga_dists[fpga2->index][fpga1->index] = 1;
         }
     }
-    std::cout << "update fpga dists done" << std::endl;
 }
 
 void TopoPart::all_pairs_shortest_path() {
-    // Floyd-Warshall algorithm for node distances
-    for(int k = 0; k < num_nodes; k++) {
-        std::cout << k << " / " << num_nodes << std::endl;
-        for(int i = 0; i < num_nodes; i++) {
-            for(int j = 0; j < num_nodes; j++) {
-                if(i == j)
-                    node_dists[i][j] = 0;
-                if(node_dists[i][k] == INT_MAX || node_dists[k][j] == INT_MAX)
-                    continue;
-                if(node_dists[i][k] + node_dists[k][j] < node_dists[i][j]) {
-                    node_dists[i][j] = node_dists[i][k] + node_dists[k][j];
-                }
-            }
-        }
-    }
-
     // Floyd-Warshall algorithm for FPGA distances
     for(int k = 0; k < num_fpgas; k++) {
         for(int i = 0; i < num_fpgas; i++) {
@@ -223,22 +180,6 @@ void TopoPart::build_fpga_dist_sets() {
     }
 }
 
-void TopoPart::build_node_dist_sets() {
-    for(const auto& p : fixed_node_pairs) {
-        Node* node = p.first;
-        Fpga* fpga = p.second;
-        int d = fpga->max_dist;
-        for(int i = 0; i <= d; i++) {
-            std::set<Node*> dist_set;
-            for(int j = 0; j < num_nodes; j++) {
-                if(node_dists[node->index][j] < i)
-                    dist_set.insert(nodes[j]);
-            }
-            node->dist_sets.push_back(dist_set);
-        }
-    }
-}
-
 void TopoPart::init_cddts() {
     for(auto& np : nodes) {
         Node* node = np.second;
@@ -261,10 +202,11 @@ void TopoPart::update_cddts() {
         Fpga* fpga_i = p.second;
         int d = fpga_i->max_dist;
 
-        for(auto& node_j : node_i->dist_sets[d]) {
+        for(auto& node_j : node_i->dist_set) {
             // if node moveable
             if(!node_j->fixed) {
-                int k = node_dists[node_j->index][node_i->index];
+                // int k = node_dists[node_j->index][node_i->index];
+                int k = node_j->get_dist(node_i);
                 node_j->intersect_cddts(fpga_i->dist_sets[k]);
 
                 if(node_j->cddts.size() == 1) {
@@ -276,14 +218,7 @@ void TopoPart::update_cddts() {
 
                         // Build dist sets
                         int md = node_j->fpga->max_dist;
-                        for(int i = 0; i <= md; i++) {
-                            std::set<Node*> dist_set;
-                            for(int j = 0; j < num_nodes; j++) {
-                                if(node_dists[node_j->index][j] < i)
-                                    dist_set.insert(nodes[j]);
-                            }
-                            node_j->dist_sets.push_back(dist_set);
-                        }
+                        node_j->make_dist_set(md);
                     } else {
                         std::cout << "No feasible solution." << std::endl;
                         return;
@@ -388,19 +323,6 @@ void TopoPart::print_nets() {
     for(const auto& p : nets) {
         Net* net = p.second;
         net->print();
-        std::cout << std::endl;
-    }
-}
-
-void TopoPart::print_node_dists() {
-    std::cout << "Node distances:" << std::endl;
-    for(int i = 0; i < num_nodes; i++) {
-        for(int j = 0; j < num_nodes; j++) {
-            if(node_dists[i][j] == INT_MAX)
-                std::cout << "- ";
-            else
-                std::cout << node_dists[i][j] << " ";
-        }
         std::cout << std::endl;
     }
 }

@@ -17,7 +17,6 @@ public:
     std::unordered_map<int, Node*> nodes;
     std::unordered_map<int, Fpga*> fpgas;
     std::unordered_map<int, Net*> nets;
-    std::vector<std::vector<int>> node_dists;
     std::vector<std::vector<int>> fpga_dists;
     std::vector<std::pair<Node*, Fpga*>> fixed_node_pairs;
 
@@ -31,7 +30,6 @@ public:
     void all_pairs_shortest_path();
     void calc_fpga_max_dist();
     void build_fpga_dist_sets();
-    void build_node_dist_sets();
     void init_cddts();
     void update_cddts();
     void partition();
@@ -41,7 +39,6 @@ public:
     void print_nodes();
     void print_fpgas();
     void print_nets();
-    void print_node_dists();
     void print_fpga_dists();
 };
 #endif

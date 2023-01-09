@@ -7,7 +7,7 @@ Node::Node() {
     fixed = false;
     fpga = nullptr;
     nets = {};
-    dist_sets = {};
+    dist_set = {};
     cddts = {};
 }
 
@@ -16,7 +16,7 @@ Node::Node(int index) {
     fixed = false;
     fpga = nullptr;
     nets = {};
-    dist_sets = {};
+    dist_set = {};
     cddts = {};
 }
 
@@ -37,6 +37,23 @@ void Node::set_fixed(bool fixed) {
 
 void Node::add_cddt(Fpga* fpga) {
     cddts.insert(fpga);
+}
+
+void Node::make_dist_set(int d) {
+    int i = 1;
+    std::queue<Node*> q;
+    for(const auto& node : neighbors) {
+        q.push(node);
+    }
+    while(q.size() > 0 && i < d) {
+        Node* node = q.front();
+        q.pop();
+        dist_set.insert(node);
+        for(const auto& neighbor : node->neighbors) {
+            q.push(neighbor);
+        }
+        i++;
+    }
 }
 
 void Node::intersect_cddts(std::set<Fpga*> fpgas) {
@@ -60,6 +77,29 @@ void Node::make_neighbor(std::vector<Node*> nodes) {
             neighbors.push_back(node);
         }
     }
+}
+
+int Node::get_dist(Node* node) {
+    int d = 1;
+    std::queue<Node*> q;
+    for(const auto& node : neighbors) {
+        q.push(node);
+    }
+    while(q.size() > 0) {
+        int n = q.size();
+        for(int i = 0; i < n; i++) {
+            Node* node = q.front();
+            q.pop();
+            if(node->index == node->index) {
+                return d;
+            }
+            for(const auto& neighbor : node->neighbors) {
+                q.push(neighbor);
+            }
+        }
+        d++;
+    }
+    return d;
 }
 
 int Node::get_cut_size() {
@@ -94,15 +134,11 @@ void Node::print() {
         std::cout << neighbor->index << ", ";
     }
     std::cout << std::endl;
-    std::cout << "Dist Sets: ";
-    for(const auto& dist_set : dist_sets) {
-        std::cout << "{";
-        for(const auto& node : dist_set) {
-            std::cout << node->index << ",";
-        }
-        std::cout << "} ";
+    std::cout << "Dist Set: {";
+    for(const auto& node : dist_set) {
+        std::cout << node->index << ", ";
     }
-    std::cout << std::endl;
+    std::cout << "}" << std::endl;
     std::cout << "Cddts: {";
     for(const auto& cddt : cddts) {
         std::cout << cddt->index << ", ";

@@ -25,6 +25,9 @@ void Node::add_net(Net* net) {
 }
 
 void Node::set_fpga(Fpga* fpga) {
+    if(this->fpga != nullptr) {
+        std::cout << index << " WTF" << std::endl;
+    }
     this->fpga = fpga;
 }
 

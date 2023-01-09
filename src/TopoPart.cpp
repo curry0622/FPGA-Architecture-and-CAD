@@ -6,30 +6,39 @@
 TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Read input
     read_input(file_input);
-    print_nodes();
-    pause();
+    std::cout << "read input done" << std::endl;
 
     // Initialize distance of nodes and FPGAs
     init_dists();
+    std::cout << "init dists done" << std::endl;
 
     // Calculate all pairs shortest path to find min dist
     all_pairs_shortest_path();
+    std::cout << "all pairs shortest path done" << std::endl;
 
     // Calculate max dist of FPGAs
     calc_fpga_max_dist();
+    std::cout << "calc fpga max dist done" << std::endl;
 
     // Build FPGA distance sets
     build_fpga_dist_sets();
+    std::cout << "build fpga dist sets done" << std::endl;
 
     // Build node distance sets
     build_node_dist_sets();
+    std::cout << "build node dist sets done" << std::endl;
 
     // Initialize each node's candidates
     init_cddts();
+    std::cout << "init cddts done" << std::endl;
 
     // Update node's candidates
     update_cddts();
-    print_nodes();
+    std::cout << "update cddts done" << std::endl;
+
+    // Partition
+    partition();
+    std::cout << "partition done" << std::endl;
 
     // Write output
     write_output(file_output);
@@ -105,8 +114,9 @@ void TopoPart::write_output(std::string file_output) {
         fout << nodes[i]->index << " ";
         if(nodes[i]->fpga != nullptr)
             fout << nodes[i]->fpga->index << std::endl;
-        else
+        else {
             fout << -1 << std::endl;
+        }
     }
     fout.close();
 }
@@ -120,6 +130,7 @@ void TopoPart::init_dists() {
         }
         node_dists.push_back(dist);
     }
+    std::cout << "init node dists done" << std::endl;
 
     // Initialize FPGA distances
     for(int i = 0; i < num_fpgas; i++) {
@@ -129,6 +140,7 @@ void TopoPart::init_dists() {
         }
         fpga_dists.push_back(dist);
     }
+    std::cout << "init fpga dists done" << std::endl;
 
     // Update node distances
     for(const auto& p : nets) {
@@ -139,6 +151,7 @@ void TopoPart::init_dists() {
             node_dists[sink->index][src->index] = 1;
         }
     }
+    std::cout << "update node dists done" << std::endl;
 
     // Update FPGA distances
     for(const auto& fpga_pair : fpgas) {
@@ -148,11 +161,13 @@ void TopoPart::init_dists() {
             fpga_dists[fpga2->index][fpga1->index] = 1;
         }
     }
+    std::cout << "update fpga dists done" << std::endl;
 }
 
 void TopoPart::all_pairs_shortest_path() {
     // Floyd-Warshall algorithm for node distances
     for(int k = 0; k < num_nodes; k++) {
+        std::cout << k << " / " << num_nodes << std::endl;
         for(int i = 0; i < num_nodes; i++) {
             for(int j = 0; j < num_nodes; j++) {
                 if(i == j)
@@ -303,9 +318,49 @@ void TopoPart::partition() {
 
     // While pq isn't empty, assign each moveable node to a fpga
     while(!pq.empty()) {
-        Node* node = pq.top();
+        // Get node_j with smallest cddt size
+        Node* node_j = pq.top();
         pq.pop();
-        bool revert = false;
+
+        // Set node_j's fpga to its cddts top if the fpga isn't full
+        while(!node_j->cddts.empty()) {
+            if(node_j->fixed)
+                break;
+            Fpga* fpga_j = *(node_j->cddts.begin());
+            if(fpga_j->add_node(node_j)) {
+                node_j->set_fpga(fpga_j);
+                node_j->set_fixed(true);
+                for(auto& node_k : node_j->neighbors) {
+                    if(!node_k->fixed) {
+                        pq.push(node_k);
+                    }
+                }
+                break;
+            } else {
+                node_j->cddts.erase(node_j->cddts.begin());
+            }
+        }
+    }
+
+    // Assign nodes that have no fpga to a available fpga
+    std::vector<Fpga*> available_fpgas;
+    for(const auto& p : fpgas) {
+        Fpga* fpga = p.second;
+        if(fpga->nodes.size() < fpga->capacity)
+            available_fpgas.push_back(fpga);
+    }
+
+    for(auto& p : nodes) {
+        Node* node = p.second;
+        if(node->fpga == nullptr) {
+            for(auto& fpga : available_fpgas) {
+                if(fpga->add_node(node)) {
+                    node->set_fpga(fpga);
+                    node->set_fixed(true);
+                    break;
+                }
+            }
+        }
     }
 }
 

@@ -6,12 +6,13 @@ class Node;
 class Net {
 public:
     // Variables
+    int index;
     Node* src;
     std::vector<Node*> sinks;
 
     // Constructors
     Net();
-    Net(Node* src);
+    Net(Node* src, int index);
 
     // Methods
     void add_sink(Node* sink);

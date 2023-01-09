@@ -1,10 +1,12 @@
 #include "Node.hpp"
 #include "Fpga.hpp"
+#include "Net.hpp"
 
 Node::Node() {
     index = -1;
     fixed = false;
     fpga = nullptr;
+    nets = {};
     dist_sets = {};
     cddts = {};
 }
@@ -13,8 +15,13 @@ Node::Node(int index) {
     this->index = index;
     fixed = false;
     fpga = nullptr;
+    nets = {};
     dist_sets = {};
     cddts = {};
+}
+
+void Node::add_net(Net* net) {
+    nets.push_back(net);
 }
 
 void Node::set_fpga(Fpga* fpga) {
@@ -52,6 +59,10 @@ void Node::print() {
     else
         std::cout << "FPGA: None" << std::endl;
     std::cout << "Fixed: " << fixed << std::endl;
+    std::cout << "Nets: " << std::endl;
+    for(const auto& net : nets) {
+        net->print();
+    }
     std::cout << "Dist Sets: ";
     for(const auto& dist_set : dist_sets) {
         std::cout << "{";

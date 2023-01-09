@@ -6,6 +6,8 @@
 TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Read input
     read_input(file_input);
+    print_nodes();
+    pause();
 
     // Initialize distance of nodes and FPGAs
     init_dists();
@@ -72,12 +74,14 @@ void TopoPart::read_input(std::string file_input) {
         int src, sink;
         ss << line;
         ss >> src;
-        Net* net = new Net(nodes[src]);
+        Net* net = new Net(nodes[src], i);
+        nodes[src]->add_net(net);
         while(ss >> sink) {
             net->add_sink(nodes[sink]);
+            nodes[sink]->add_net(net);
         }
         ss.clear();
-        nets.push_back(net);
+        nets[i] = net;
     }
 
     // Read fixed nodes
@@ -126,7 +130,8 @@ void TopoPart::init_dists() {
     }
 
     // Update node distances
-    for(const auto& net : nets) {
+    for(const auto& p : nets) {
+        Net* net = p.second;
         Node* src = net->src;
         for(const auto& sink : net->sinks) {
             node_dists[src->index][sink->index] = 1;
@@ -298,7 +303,8 @@ void TopoPart::print_fpgas() {
 }
 
 void TopoPart::print_nets() {
-    for(const auto& net : nets) {
+    for(const auto& p : nets) {
+        Net* net = p.second;
         net->print();
         std::cout << std::endl;
     }

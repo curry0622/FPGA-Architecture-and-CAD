@@ -6,8 +6,9 @@ Net::Net() {
     sinks = {};
 }
 
-Net::Net(Node* src) {
+Net::Net(Node* src, int index) {
     this->src = src;
+    this->index = index;
     sinks = {};
 }
 
@@ -17,6 +18,7 @@ void Net::add_sink(Node* sink) {
 
 void Net::print() {
     std::cout << "[Net]" << std::endl;
+    std::cout << "Index: " << index << std::endl;
     std::cout << "Source: " << src->index << std::endl;
     std::cout << "Sinks: ";
     for(const auto& sink : sinks) {

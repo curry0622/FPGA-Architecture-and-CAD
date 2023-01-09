@@ -16,7 +16,7 @@ public:
     int num_fixed_nodes;
     std::unordered_map<int, Node*> nodes;
     std::unordered_map<int, Fpga*> fpgas;
-    std::vector<Net*> nets;
+    std::unordered_map<int, Net*> nets;
     std::vector<std::vector<int>> node_dists;
     std::vector<std::vector<int>> fpga_dists;
     std::vector<std::pair<Node*, Fpga*>> fixed_node_pairs;

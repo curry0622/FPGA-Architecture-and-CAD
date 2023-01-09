@@ -27,6 +27,7 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
 
     // Update node's candidates
     update_cddts();
+    print_nodes();
 
     // Write output
     write_output(file_output);
@@ -244,20 +245,27 @@ void TopoPart::update_cddts() {
             if(!node_j->fixed) {
                 int k = node_dists[node_j->index][node_i->index];
                 node_j->intersect_cddts(fpga_i->dist_sets[k]);
-                if(node_j->cddts.size() == 1) {
-                    node_j->set_fpga(*(node_j->cddts.begin()));
-                    node_j->set_fixed(true);
-                    fixed_node_pairs.push_back(std::make_pair(node_j, node_j->fpga));
 
-                    // Build dist sets
-                    int md = node_j->fpga->max_dist;
-                    for(int i = 0; i <= md; i++) {
-                        std::set<Node*> dist_set;
-                        for(int j = 0; j < num_nodes; j++) {
-                            if(node_dists[node_j->index][j] < i)
-                                dist_set.insert(nodes[j]);
+                if(node_j->cddts.size() == 1) {
+                    Fpga* fpga_j = *(node_j->cddts.begin());
+                    if(fpga_j->add_node(node_j)) {
+                        node_j->set_fpga(fpga_j);
+                        node_j->set_fixed(true);
+                        fixed_node_pairs.push_back(std::make_pair(node_j, node_j->fpga));
+
+                        // Build dist sets
+                        int md = node_j->fpga->max_dist;
+                        for(int i = 0; i <= md; i++) {
+                            std::set<Node*> dist_set;
+                            for(int j = 0; j < num_nodes; j++) {
+                                if(node_dists[node_j->index][j] < i)
+                                    dist_set.insert(nodes[j]);
+                            }
+                            node_j->dist_sets.push_back(dist_set);
                         }
-                        node_j->dist_sets.push_back(dist_set);
+                    } else {
+                        std::cout << "No feasible solution." << std::endl;
+                        return;
                     }
                 }
                 if(node_j->cddts.size() == 0) {

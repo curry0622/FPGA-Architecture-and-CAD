@@ -6,6 +6,7 @@ Node::Node() {
     fixed = false;
     fpga = nullptr;
     dist_sets = {};
+    cddts = {};
 }
 
 Node::Node(int index) {
@@ -13,6 +14,7 @@ Node::Node(int index) {
     fixed = false;
     fpga = nullptr;
     dist_sets = {};
+    cddts = {};
 }
 
 void Node::set_fpga(Fpga* fpga) {
@@ -21,6 +23,10 @@ void Node::set_fpga(Fpga* fpga) {
 
 void Node::set_fixed(bool fixed) {
     this->fixed = fixed;
+}
+
+void Node::add_cddt(Fpga* fpga) {
+    cddts.insert(fpga);
 }
 
 void Node::print() {
@@ -39,5 +45,11 @@ void Node::print() {
         }
         std::cout << "} ";
     }
+    std::cout << std::endl;
+    std::cout << "Cddts: {";
+    for(const auto& cddt : cddts) {
+        std::cout << cddt->index << ", ";
+    }
+    std::cout << "}" << std::endl;
     std::cout << std::endl;
 }

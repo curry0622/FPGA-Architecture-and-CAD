@@ -32,6 +32,7 @@ public:
     void calc_fpga_max_dist();
     void build_fpga_dist_sets();
     void build_node_dist_sets();
+    void init_cddts();
 
     // Utils
     void pause();

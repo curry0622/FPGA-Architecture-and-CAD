@@ -6,7 +6,6 @@
 TopoPart::TopoPart(std::string file_input, std::string file_output) {
     // Read input
     read_input(file_input);
-    print_nets();
 
     // Initialize distance of nodes and FPGAs
     init_dists();
@@ -22,6 +21,10 @@ TopoPart::TopoPart(std::string file_input, std::string file_output) {
 
     // Build node distance sets
     build_node_dist_sets();
+
+    // Initialize each node's candidates
+    init_cddts();
+    print_nodes();
 
     // Write output
     write_output(file_output);
@@ -186,7 +189,7 @@ void TopoPart::build_fpga_dist_sets() {
     for(auto& fpga_pair : fpgas) {
         Fpga* fpga = fpga_pair.second;
         for(int i = 0; i <= fpga->max_dist; i++) {
-            std::set<Fpga*> dist_set;
+            std::unordered_set<Fpga*> dist_set;
             for(int j = 0; j < num_fpgas; j++) {
                 if(fpga_dists[fpga->index][j] <= i)
                     dist_set.insert(fpgas[j]);
@@ -202,12 +205,26 @@ void TopoPart::build_node_dist_sets() {
         Fpga* fpga = p.second;
         int d = fpga->max_dist;
         for(int i = 0; i <= d; i++) {
-            std::set<Node*> dist_set;
+            std::unordered_set<Node*> dist_set;
             for(int j = 0; j < num_nodes; j++) {
                 if(node_dists[node->index][j] < i)
                     dist_set.insert(nodes[j]);
             }
             node->dist_sets.push_back(dist_set);
+        }
+    }
+}
+
+void TopoPart::init_cddts() {
+    for(auto& np : nodes) {
+        Node* node = np.second;
+        if(node->fixed) {
+            node->add_cddt(node->fpga);
+        } else {
+            for(const auto& fp : fpgas) {
+                Fpga* fpga = fp.second;
+                node->add_cddt(fpga);
+            }
         }
     }
 }

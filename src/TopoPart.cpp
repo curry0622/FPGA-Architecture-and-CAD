@@ -81,6 +81,7 @@ void TopoPart::read_input(std::string file_input) {
             nodes[sink]->add_net(net);
         }
         ss.clear();
+        net->make_neighborhood();
         nets[i] = net;
     }
 
@@ -279,6 +280,32 @@ void TopoPart::update_cddts() {
                 }
             }
         }
+    }
+}
+
+void TopoPart::partition() {
+    // NodeCmp: compare nodes by cddt size
+    struct NodeCmp {
+        bool operator()(Node* n1, Node* n2) {
+            return n1->cddts.size() > n2->cddts.size();
+        }
+    };
+
+    // Priority queue: nodes with fewer cddt has higher priority
+    std::priority_queue<Node*, std::vector<Node*>, NodeCmp> pq;
+
+    // For each moveable node, insert it to pq according to its cddt size
+    for(const auto& p : nodes) {
+        Node* node = p.second;
+        if(!node->fixed)
+            pq.push(node);
+    }
+
+    // While pq isn't empty, assign each moveable node to a fpga
+    while(!pq.empty()) {
+        Node* node = pq.top();
+        pq.pop();
+        bool revert = false;
     }
 }
 

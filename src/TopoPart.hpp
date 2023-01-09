@@ -34,6 +34,7 @@ public:
     void build_node_dist_sets();
     void init_cddts();
     void update_cddts();
+    void partition();
 
     // Utils
     void pause();

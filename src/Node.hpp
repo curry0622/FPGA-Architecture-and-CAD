@@ -10,6 +10,7 @@ public:
     int index;
     bool fixed;
     Fpga* fpga;
+    std::vector<Node*> neighbors;
     std::vector<Net*> nets;
     std::vector<std::set<Node*>> dist_sets;
     std::set<Fpga*> cddts;
@@ -24,6 +25,7 @@ public:
     void set_fixed(bool fixed);
     void add_cddt(Fpga* fpga);
     void intersect_cddts(std::set<Fpga*> fpgas);
+    void make_neighbor(std::vector<Node*> nodes);
     int get_cut_size();
 
     // Utils

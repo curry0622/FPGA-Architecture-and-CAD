@@ -16,6 +16,14 @@ void Net::add_sink(Node* sink) {
     sinks.push_back(sink);
 }
 
+void::Net::make_neighborhood() {
+    std::vector<Node*> nodes(sinks);
+    nodes.push_back(src);
+    for(auto& node : nodes) {
+        node->make_neighbor(nodes);
+    }
+}
+
 void Net::print() {
     std::cout << "[Net]" << std::endl;
     std::cout << "Index: " << index << std::endl;

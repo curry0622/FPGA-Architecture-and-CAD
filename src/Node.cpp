@@ -51,6 +51,14 @@ void Node::intersect_cddts(std::set<Fpga*> fpgas) {
     cddts = tmp;
 }
 
+void Node::make_neighbor(std::vector<Node*> nodes) {
+    for(const auto& node : nodes) {
+        if(node->index != index) {
+            neighbors.push_back(node);
+        }
+    }
+}
+
 int Node::get_cut_size() {
     int cut_size = 0;
     for(const auto& net : nets) {
@@ -78,6 +86,11 @@ void Node::print() {
     for(const auto& net : nets) {
         net->print();
     }
+    std::cout << "Neighbors: ";
+    for(const auto& neighbor : neighbors) {
+        std::cout << neighbor->index << ", ";
+    }
+    std::cout << std::endl;
     std::cout << "Dist Sets: ";
     for(const auto& dist_set : dist_sets) {
         std::cout << "{";

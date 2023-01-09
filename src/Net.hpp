@@ -16,6 +16,7 @@ public:
 
     // Methods
     void add_sink(Node* sink);
+    void make_neighborhood();
 
     // Utils
     void print();
